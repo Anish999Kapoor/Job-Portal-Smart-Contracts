@@ -19,7 +19,7 @@ contract JobPortal {
 
     struct Job{
         string jobType;
-        uint8 offer;
+        uint offer;
         string description;
         string skills;
         uint128[] applicants;
@@ -30,19 +30,20 @@ contract JobPortal {
     mapping(uint => Job) jobs;
     mapping(address => uint128) applicantID;
     mapping(address => uint128[]) jobID;
-    uint128 applicantIDCounter;
-    uint128 jobIDCounter;
+    uint128 applicantIDCounter=1;
+    uint128 jobIDCounter=1;
 
 
-    function register(string calldata name_,string calldata contact_, uint64 age_, uint64 expectation_, string calldata history_, string calldata skills_, string calldata jobType_) external {
+    function register(string calldata name_,string calldata contact_, uint64 age_, uint64 expectation_, string calldata history_, string calldata skills_, string calldata jobType_) external returns(uint) {
         require(applicantID[msg.sender] == 0, 'already registered');
         Details memory details = Details(name_,contact_,age_,expectation_,0,0,history_,skills_,jobType_,true);
         applicants[applicantIDCounter] = details;
         applicantID[msg.sender] = applicantIDCounter;
-        applicantIDCounter++;
+        ++applicantIDCounter;
+        return applicantID[msg.sender];
     }
 
-    function addJob(string calldata jobType_, uint8 offer_, string calldata description_, string calldata skills_) external {
+    function addJob(string calldata jobType_, uint offer_, string calldata description_, string calldata skills_) external returns(uint){
         Job storage job = jobs[jobIDCounter];
         job.jobType = jobType_;
         job.offer = offer_;
@@ -50,7 +51,8 @@ contract JobPortal {
         job.skills = skills_;
 
         jobID[msg.sender].push(jobIDCounter);
-        jobIDCounter++;
+        ++jobIDCounter;
+        return --jobIDCounter;
     }
 
     function applyForJob(uint128 jobID_) external {
@@ -94,7 +96,7 @@ contract JobPortal {
         return applicants[applicantID_].jobType;
     }
 
-    function jobDetails(uint128 jobID_) external view returns(string memory,uint8,string memory,string memory,uint128[] memory){
+    function jobDetails(uint128 jobID_) external view returns(string memory,uint,string memory,string memory,uint128[] memory){
         return(jobs[jobID_].jobType,jobs[jobID_].offer,jobs[jobID_].description,jobs[jobID_].skills,jobs[jobID_].applicants);
     }
 
